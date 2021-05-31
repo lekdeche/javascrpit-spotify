@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="./js/script.js" defer></script>
     <title>Spotify playlist Manager</title>
 </head>
 <body>
@@ -13,22 +14,29 @@
         <button>Rechercher</button>
     </section>
 
-    <section>
+    <section id="first-playlist">
         <h2>Résultats</h2>
-        <ul>
-            <li>Time is running out - Muse <button>Ajouter</button></li>
-        </ul>
+
+            <ul id="list-group">
+                <li class="list-group-item1">House party 2020 <button data-song="House party 2020">Ajouter</button></li>
+                <li class="list-group-item2">Ete 2020<button data-song="Ete 2020">Ajouter</button></li>
+                <li class="list-group-item3">Challenge 2020<button data-song="Challange 2020">Ajouter</button></li>
+                <li class="list-group-item4">Top hit kids 2020<button data-song="Top hit kids 2020">Ajouter</button></li>
+               
+            </ul>
     </section>
 
-    <section>
+    <section id="Playlist">
         <h2>PlayList</h2>
         <ul>
-            <li>ACDC <button>Supprimer</button></li>
+            <li><span id="ResultPlayList"></div></span></li>
+             <button>Supprimer</button></li>
         </ul>
     </section>
 
     <section>
         <button>Sauvegarder la playlist sur Spotify</button>
+        <button>test</button>
 
     </section>
     
