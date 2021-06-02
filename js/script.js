@@ -1,58 +1,67 @@
-//const buttons = document.querySelectorAll("button")
+// Constantes
+const clienId = 'a12a62138a824884805c61fde334ed10'
+const redirectURI = 'http://127.0.0.1:5500/javascript-spotify/'
+let accessToken = null
 
-//const playListButton = button[0]
-const plusButtons = document.querySelectorAll('#first-playlist button');
-const pListInput = document.getElementById('list-group');
-const pListSpan = document.getElementById('ResultPlayList');
-
-const removeButton = document.querySelector('#playlist button');
-const removeList = document.getElementById('ResultPlayList');
-
-const spotifyAcces = document.getElementById('spotify');
-
+// Sélecteurs
+const addbuttons = document.querySelectorAll('#result-section button')
+const ulPlaylist = document.querySelector('#playlist-section ul')
+const connectBtn = document.getElementById('connect-spotify')
+const searchBtn = document.getElementById('search-button')
 
 
-
-plusButtons.forEach(button => {
-  button.addEventListener('click', () => {
-    console.log(button.dataset.song);
-    const newPlayList1 = document.createElement('li');
-    const text = document.createTextNode(button.dataset.song);
-
-    const del = document.createElement('button');
-    del.textContent = "Delete";
-    del.addEventListener('click', () => {
-      newPlayList1.remove(text);
-      
-    })
-    
-    newPlayList1.append(text);
-    newPlayList1.append(del);
-    pListSpan.append(newPlayList1);
-    
-  })
-
-});
-
-// 1) Connexion Api Spotify (access token)
-
-
-
-spotifyAcces.addEventListener('click',() => {
-
-
-  const spotify = "https://accounts.spotify.com/authorize?response_type=code&client_id=a12a62138a824884805c61fde334ed10&redirect_uri=http://127.0.0.1:5500/javascript-spotify/";
-
-  document.location.href=spotify
-
-
+// Ajout d'une musique
+addbuttons.forEach(button => {
+	button.addEventListener('click', () => {
+		console.log(button.dataset)
+		const li = document.createElement('li')
+		const liText = document.createTextNode(`${button.dataset.song} - ${button.dataset.artist}`)
+		li.append(liText)
+		const deleteButton = document.createElement('button')
+		// Suppression d'une musique
+		deleteButton.addEventListener('click', () => {
+			li.remove()
+		})
+		const btnText = document.createTextNode('Supprimer')
+		deleteButton.append(btnText)
+		li.append(deleteButton)
+		ulPlaylist.append(li)
+	})
 })
 
+// Connexion à spotify
+connectBtn.addEventListener('click', () => {
+	window.location = `https://accounts.spotify.com/authorize?client_id=${clienId}&response_type=token&redirect_uri=${redirectURI}&scope=playlist-modify-public`
+})
 
+// Création de la fonction qui me permet de récupérer l'accesToken
 
-// 2) Request Api Spotify
+const getAccessToken = () => {
+	const accessTokenMatch = window.location.hash.match(/(?<=access_token=)([^&]*)/)
+	console.log(accessTokenMatch[0])
+	accessToken = accessTokenMatch[0]
+}
 
+getAccessToken()
 
+const searchSong = () => {
+	const options = {
+		method: "GET",
+		headers: {
+        		Accept: "application/json",
+		"Content-Type": "application/json",
+			Authorization: `Bearer ${accessToken}`,
+		},
+	}
+	console.log(accessToken)
+	fetch("https://api.spotify.com/v1/search?q=muse&type=track", options)
+		.then(response => response.json())
+		.then(data => {
+			console.log(data)
+		})
+}
+
+searchBtn.addEventListener('click', searchSong)
 
 
 
