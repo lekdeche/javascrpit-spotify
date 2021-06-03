@@ -8,27 +8,25 @@
 	<script src="js/script.js" defer></script>
 </head>
 <body>
-	<button id="connect-spotify">Connect to Spotify</button>
+	<button id="connect-spotify">Connect to Spotify</button><br></br>
 	<section>
 		<label for="search">Rechercher</label>
 		<input type="text" id="search">
 		<button id="search-button">Rechercher</button>
 	</section>
-	<section id="result-section">
+	<section >
 		<h2>Résultats</h2>
-		<ul>
-			<li>Musique1<button data-id="1" data-song="Musique1" data-artist="">Ajouter</button></li>
-			<li>Musique2<button data-id="2" data-song="Musique2" data-artist="">Ajouter</button></li>
-		</ul>
+		<ul id="resultSection"><ul>
 	</section>
-	<section id="playlist-section">
+	<section id="playlistSection">
 		<h2>Playlist</h2>
 		<ul>
-			<!--<li> <button>Supprimer</button></li>-->
+			<!--<li> <button id="delete-button">Supprimer</button></li>-->
 		</ul>
 	</section>
 	<section>
-		<button>Sauvergarder la playlist sur Spotify</button>
+        <h4>Sauvergarder la playlist sur Spotify</h4>
+		<button>Sauvergarder</button>
 	</section>
 </body>
 </html>
