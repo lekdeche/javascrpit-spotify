@@ -1,137 +1,147 @@
+
 // Constantes
 const clienId = 'a12a62138a824884805c61fde334ed10'
 const redirectURI = 'http://127.0.0.1:5500/javascript-spotify/'
 let accessToken = null
+let userId = null
 
 // Sélecteurs
 const addbuttons = document.querySelectorAll('#result-section button')
 const ulPlaylist = document.querySelector('#playlist-section ul')
 const connectBtn = document.getElementById('connect-spotify')
 const searchBtn = document.getElementById('search-button')
-const inputSearch = document.getElementById('search')
-const deletButton = document.getElementById('delete-button')
+const searchInput = document.getElementById('search')
 const ulResult = document.querySelector('#result-section ul')
-const btnText = document.getElementById('ajouter')
-
+const saveBtn = document.getElementById('save')
 
 // Ajout d'une musique
-  //addbuttons.forEach(button => {
-	//button.addEventListener('click', () => {
-		//console.log(button.dataset)
-		//const li = document.createElement('li')
-		//const liText = document.createTextNode(`${button.dataset.song} - ${button.dataset.artist}`)
-		//li.append(liText)
-		//const deleteButton = document.createElement('button')
-		// Suppression d'une musique
-		//deleteButton.addEventListener('click', () => {
-		//li.remove()
-		//})
-		//const btnText = document.createTextNode('Supprimer')
-		//deleteButton.append(btnText)
-		//li.append(deleteButton)
-		//ulPlaylist.append(li)
-//	})
-//})
-
+const addToPlaylist = (button) => {
+	const li = document.createElement('li')
+	li.setAttribute("data-uri", button.dataset.id)
+	const liText = document.createTextNode(`${button.dataset.song} - ${button.dataset.artist}`)
+	li.append(liText)
+	const deleteButton = document.createElement('button')
+	// Suppression d'une musique
+	deleteButton.addEventListener('click', () => {
+		li.remove()
+	})
+	const btnText = document.createTextNode('Supprimer')
+	deleteButton.append(btnText)
+	li.append(deleteButton)
+	ulPlaylist.append(li)
+}
 // Connexion à spotify
-    connectBtn.addEventListener('click', () => {
-  	window.location = `https://accounts.spotify.com/authorize?client_id=${clienId}&response_type=token&redirect_uri=${redirectURI}&scope=playlist-modify-public`
-    })
+connectBtn.addEventListener('click', () => {
+	window.location = `https://accounts.spotify.com/authorize?client_id=${clienId}&response_type=token&redirect_uri=${redirectURI}&scope=playlist-modify-public`
+})
 
 // Création de la fonction qui me permet de récupérer l'accesToken
 
-    const getAccessToken = () => {
-	  const accessTokenMatch = window.location.hash.match(/(?<=access_token=)([^&]*)/)
-	  console.log(accessTokenMatch[0])
-	  accessToken = accessTokenMatch[0]
-    }
+const getAccessToken = () => {
+	const accessTokenMatch = window.location.hash.match(/(?<=access_token=)([^&]*)/)
+	console.log(accessTokenMatch)
+	if (accessTokenMatch) {
+		accessToken = accessTokenMatch[0]
+	}
+}
 
-  getAccessToken()
+getAccessToken()
 
-  const searchSong = () => {
+const getUserId = async () => {
+	const response = await fetch('https://api.spotify.com/v1/me', {
+		method: 'GET',
+		headers: {
+			Authorization: `Bearer ${accessToken}`,
+			Accept: 'application/json',
+			'Content-Type': 'application/json',
+		}
+	})
+	const data = await response.json()
+	userId = data.id
+	return data.id
+}
+
+const searchSong = () => {
+	const searchedMusic = searchInput.value
 	const options = {
 		method: "GET",
 		headers: {
-        		Accept: "application/json",
-		"Content-Type": "application/json",
+			Accept: "application/json",
+			"Content-Type": "application/json",
 			Authorization: `Bearer ${accessToken}`,
 		},
 	}
 	console.log(accessToken)
-	fetch("https://api.spotify.com/v1/search?q=muse&type=track", options)
+	fetch(`https://api.spotify.com/v1/search?q=${searchedMusic}&type=track`, options)
 		.then(response => response.json())
 		.then(data => {
 			console.log(data)
+			data.tracks.items.forEach(song => createResultLI(song))
 		})
 }
 
+{/* <li>Time is running out - Muse <button data-id="1" data-song="Time is running out" data-artist="Muse">Ajouter</button></li> */}
 
-// Recherche par titres/ chanson
-// on creer un btn d'evenement 
+const createResultLI = (songInfo) => {
+	const newLi = document.createElement('li')
+	const newBtn = document.createElement('button')
+	const liText = document.createTextNode(`${songInfo.name} - ${songInfo.artists[0].name}`)
+	newBtn.setAttribute('data-id', songInfo.id)
+	newBtn.setAttribute('data-song', songInfo.name)
+	newBtn.setAttribute('data-artist', songInfo.artists[0].name)
+	newBtn.textContent = 'Ajouter'
+	newBtn.addEventListener('click', () => addToPlaylist(newBtn))
+	newLi.append(liText)
+	newLi.append(newBtn)
+	ulResult.append(newLi)
+}
 
-  
-    searchBtn.addEventListener('click',  () => {
+const getURIs = () => {
+	const listLi = document.querySelectorAll('#playlist-section ul li')
+	const uris = []
+	listLi.forEach(li => {
+		uris.push(`spotify:track:${li.dataset.uri}`)
+	})
+	return uris
+}
 
-    const options = {
-    method: "GET",
+searchBtn.addEventListener('click', searchSong)
+
+// https://api.spotify.com/v1/users/{user_id}/playlists POST
+saveBtn.addEventListener('click', async () => {
+	if (userId === null) {
+		await getUserId()
+	}
+	const options = {
+		method: "POST",
 		headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
+			Accept: "application/json",
+			"Content-Type": "application/json",
 			Authorization: `Bearer ${accessToken}`,
-		  },
-    }
-  
-  // on recupere l'id de l'nput du label "rechercher" ensuite on ajoute Input value dans le chemi le Fetch
-  
-  
-      fetch(`https://api.spotify.com/v1/search?q=${inputSearch.value}&type=track`, options)
-      .then(response => response.json())
-      .then(data => {
-      console.log(data)
-      const li = document.createElement('li')
-      const addbuttons = document.createElement('button');
-      addbuttons.textContent = "Ajouter";
-      const liText = document.createTextNode(`${data.tracks.items[0].name} - ${data.tracks.items[0].artists[0].name} `)
+		},
+		body: JSON.stringify({
+			"name": "New Playlist",
+			"description": "New playlist description",
+			"public": true
+		})
+	}
+	const createPlaylistResponse = await fetch(`https://api.spotify.com/v1/users/${userId}/playlists`, options)
+	const createPlaylistData = await createPlaylistResponse.json()
+	const playlistId = createPlaylistData.id
 
-      //Const addbtn = document.createElement('Ajouter')
-      //const btnText = document.createElement('Add')
-      li.append(liText)
-      li.append(addbuttons)
-      resultSection.append(li)
-      //addbtn.append(btnText)
+	const optionsItemsPlaylist = {
+		method: "POST",
+		headers: {
+			Accept: "application/json",
+			"Content-Type": "application/json",
+			Authorization: `Bearer ${accessToken}`,
+		},
+		body: JSON.stringify({
+			uris: getURIs()
+		})
+	}
 
-
-
-      addbuttons.addEventListener('click', () => {
-      // Creation de la balise li
-      const nouvelLi = document.createElement('li');
-      // Creation de texte avec en paramettre un get de l'attribut data-song
-      const nomMusique = document.createTextNode(`${data.tracks.items[0].name} - ${data.tracks.items[0].artists[0].name} `)
-      // Creation d'un bouton supprimer
-      const buttonDelete = document.createElement('button')
-      // Creation du text du boutton
-      buttonDelete.textContent="supprimer";
-      // Ajout de l'event click pour le boutton supprimer
-      buttonDelete.addEventListener('click',()=>{
-      // on supprimer le nom de la musique
-      nouvelLi.remove(nomMusique)
-      // on supprime egalement le boutton supprimer
-      nouvelLi.remove(buttonDelete)
-      })
-      // Attribution à la balise ul le nouvelle Li
-      playlistSection.append(nouvelLi);
-      
-      // Attribution à  la balise li le nouveau text
-      nouvelLi.append(nomMusique);
-
-      // Attribution à  la balise li nouveau button
-      nouvelLi.append(buttonDelete)
-
-    })
-    
-  })
-
+	const res = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, optionsItemsPlaylist)
+	const data = await res.json()
+	console.log(data)
 })
-
-
-
